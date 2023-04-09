@@ -1,0 +1,77 @@
+title: Truncate class and nodeshape
+version: 1.0
+queries:
+  - title: copy all
+    query: >
+      insert {
+        graph <urn:output> {
+          ?s ?p ?o
+        }
+      }
+      where {
+        graph <urn:input> {
+          ?s ?p ?o
+        }
+      }
+  - title: combine class and nodeshape
+    query: >
+      prefix sh: <http://www.w3.org/ns/shacl#>
+      delete {
+        graph <urn:output> {
+          ?shape ?p ?o
+        }
+      }
+      insert {
+        graph <urn:output> {
+          ?class ?p ?o
+        }
+      }
+      where {
+        graph <urn:output> {
+          ?shape sh:targetClass ?class.
+          ?shape ?p ?o
+        }
+      }
+  - title: truncate propertyshapes to blank nodes
+    query: >
+      PREFIX sh: <http://www.w3.org/ns/shacl#>
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      delete {
+        graph <urn:output> {
+          ?s sh:property ?p.
+          ?p rdf:type ?type.
+          ?p sh:path ?path.
+          ?p sh:name ?name.
+          ?p sh:datatype ?datatype.
+          ?p sh:class ?class.
+          ?p sh:nodeKind ?nodekind.
+          ?p sh:minCount ?mincount.
+          ?p sh:maxCount ?maxcount
+        }
+      }
+      insert {
+        graph <urn:output> {
+          ?s sh:property [
+            sh:path ?path;
+            sh:datatype ?datatype;
+            sh:class ?class;
+            sh:nodeKind ?nodekind;
+            sh:name ?name;
+            sh:minCount ?mincount;
+            sh:maxCount ?maxcount
+          ]
+        }
+      }
+      where {
+        graph <urn:output> {
+          ?s sh:property ?p.
+          ?p rdf:type ?type.
+          ?p sh:path ?path.
+          ?p sh:name ?name.
+          OPTIONAL {?p sh:datatype ?datatype}
+          OPTIONAL {?p sh:class ?class}
+          OPTIONAL {?p sh:nodeKind ?nodekind}
+          OPTIONAL {?p sh:minCount ?mincount}
+          OPTIONAL {?p sh:maxCount ?maxcount}
+        }
+      }
